@@ -19,9 +19,8 @@
 *              const uint8_t *seed: pointer to the input public seed
 **************************************************/
 static void pack_pk(uint8_t *r, polyvec *pk, const uint8_t *seed) {
-    int i;
     PQCLEAN_NAMESPACE_polyvec_tobytes(r, pk);
-    for (i = 0; i < KYBER_SYMBYTES; i++) {
+    for (size_t i = 0; i < KYBER_SYMBYTES; i++) {
         r[i + KYBER_POLYVECBYTES] = seed[i];
     }
 }
@@ -37,9 +36,8 @@ static void pack_pk(uint8_t *r, polyvec *pk, const uint8_t *seed) {
 *              - const uint8_t *packedpk: pointer to input serialized public key
 **************************************************/
 static void unpack_pk(polyvec *pk, uint8_t *seed, const uint8_t *packedpk) {
-    int i;
     PQCLEAN_NAMESPACE_polyvec_frombytes(pk, packedpk);
-    for (i = 0; i < KYBER_SYMBYTES; i++) {
+    for (size_t i = 0; i < KYBER_SYMBYTES; i++) {
         seed[i] = packedpk[i + KYBER_POLYVECBYTES];
     }
 }
@@ -100,7 +98,7 @@ static void unpack_ciphertext(polyvec *b, poly *v, const uint8_t *c) {
     PQCLEAN_NAMESPACE_poly_decompress(v, c + KYBER_POLYVECCOMPRESSEDBYTES);
 }
 
-static unsigned int rej_uniform_ref(int16_t *r, unsigned int len, const uint8_t *buf, unsigned int buflen) {
+static size_t rej_uniform_ref(int16_t *r, size_t len, const uint8_t *buf, size_t buflen) {
     unsigned int ctr, pos;
     uint16_t val;
 
@@ -136,7 +134,7 @@ static unsigned int rej_uniform_ref(int16_t *r, unsigned int len, const uint8_t 
 #define  GEN_MATRIX_MAXNBLOCKS ((530+XOF_BLOCKBYTES)/XOF_BLOCKBYTES)    /* 530 is expected number of required bytes */
 #ifdef KYBER_90S
 static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
-    unsigned int i, j, ctr;
+    size_t ctr;
     union {
         uint8_t x[XOF_BLOCKBYTES * GEN_MATRIX_MAXNBLOCKS];
         __m256i _dummy;
@@ -145,8 +143,8 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
 
     PQCLEAN_NAMESPACE_aes256ctr_init(&state, seed, 0);
 
-    for (i = 0; i < KYBER_K; i++) {
-        for (j = 0; j < KYBER_K; j++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
+        for (size_t j = 0; j < KYBER_K; j++) {
             if (transposed) {
                 PQCLEAN_NAMESPACE_aes256ctr_select(&state, (i << 8) + j);
             } else {
@@ -168,7 +166,7 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
 #else
 #if KYBER_K == 2
 static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
-    unsigned int ctr0, ctr1, ctr2, ctr3, bufbytes;
+    size_t ctr0, ctr1, ctr2, ctr3, bufbytes;
     union {
         uint8_t x[4][XOF_BLOCKBYTES * GEN_MATRIX_MAXNBLOCKS];
         __m256i _dummy;
@@ -206,7 +204,7 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
 }
 #elif KYBER_K == 3
 static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
-    unsigned int ctr0, ctr1, ctr2, ctr3, bufbytes;
+    size_t ctr0, ctr1, ctr2, ctr3, bufbytes;
     union {
         uint8_t x[4][XOF_BLOCKBYTES * GEN_MATRIX_MAXNBLOCKS];
         __m256i _dummy;
@@ -295,7 +293,7 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
 #elif KYBER_K == 4
 static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
     uint16_t i;
-    unsigned int ctr0, ctr1, ctr2, ctr3, bufbytes;
+    size_t ctr0, ctr1, ctr2, ctr3, bufbytes;
     union {
         uint8_t x[4][XOF_BLOCKBYTES * GEN_MATRIX_MAXNBLOCKS];
         __m256i _dummy;
@@ -349,7 +347,6 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
 *              - uint8_t *sk: pointer to output private key (of length KYBER_INDCPA_SECRETKEYBYTES bytes)
 **************************************************/
 void PQCLEAN_NAMESPACE_indcpa_keypair(uint8_t *pk, uint8_t *sk) {
-    int i;
     polyvec a[KYBER_K], skpv, e, pkpv;
     uint8_t buf[2 * KYBER_SYMBYTES];
     const uint8_t *publicseed = buf;
@@ -365,12 +362,12 @@ void PQCLEAN_NAMESPACE_indcpa_keypair(uint8_t *pk, uint8_t *sk) {
     aes256ctr_ctx state;
     uint8_t coins[128];
     PQCLEAN_NAMESPACE_aes256ctr_init(&state, noiseseed, 0);
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_aes256ctr_select(&state, (uint16_t)nonce++ << 8);
         PQCLEAN_NAMESPACE_aes256ctr_squeezeblocks(coins, 1, &state);
         PQCLEAN_NAMESPACE_cbd(skpv.vec + i, coins);
     }
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_aes256ctr_select(&state, (uint16_t)nonce++ << 8);
         PQCLEAN_NAMESPACE_aes256ctr_squeezeblocks(coins, 1, &state);
         PQCLEAN_NAMESPACE_cbd(e.vec + i, coins);
@@ -391,7 +388,7 @@ void PQCLEAN_NAMESPACE_indcpa_keypair(uint8_t *pk, uint8_t *sk) {
     PQCLEAN_NAMESPACE_polyvec_ntt(&e);
 
     // matrix-vector multiplication
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_polyvec_pointwise_acc(pkpv.vec + i, a + i, &skpv);
         PQCLEAN_NAMESPACE_poly_frommont(pkpv.vec + i);
     }
@@ -419,7 +416,6 @@ void PQCLEAN_NAMESPACE_indcpa_enc(uint8_t *c,
                                   const uint8_t *m,
                                   const uint8_t *pk,
                                   const uint8_t *coins) {
-    int i;
     polyvec at[KYBER_K], pkpv, sp, ep, bp;
     poly k, v, epp;
     uint8_t seed[KYBER_SYMBYTES];
@@ -433,12 +429,12 @@ void PQCLEAN_NAMESPACE_indcpa_enc(uint8_t *c,
     aes256ctr_ctx state;
     uint8_t buf[128];
     PQCLEAN_NAMESPACE_aes256ctr_init(&state, coins, 0);
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_aes256ctr_select(&state, (uint16_t)nonce++ << 8);
         PQCLEAN_NAMESPACE_aes256ctr_squeezeblocks(buf, 1, &state);
         PQCLEAN_NAMESPACE_cbd(sp.vec + i, buf);
     }
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_aes256ctr_select(&state, (uint16_t)nonce++ << 8);
         PQCLEAN_NAMESPACE_aes256ctr_squeezeblocks(buf, 1, &state);
         PQCLEAN_NAMESPACE_cbd(ep.vec + i, buf);
@@ -463,7 +459,7 @@ void PQCLEAN_NAMESPACE_indcpa_enc(uint8_t *c,
     PQCLEAN_NAMESPACE_polyvec_ntt(&sp);
 
     // matrix-vector multiplication
-    for (i = 0; i < KYBER_K; i++) {
+    for (size_t i = 0; i < KYBER_K; i++) {
         PQCLEAN_NAMESPACE_polyvec_pointwise_acc(bp.vec + i, at + i, &sp);
     }
 

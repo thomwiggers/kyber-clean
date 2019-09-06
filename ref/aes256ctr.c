@@ -387,7 +387,7 @@ static void br_aes_ct64_keysched(uint64_t *comp_skey, const uint8_t *key) {
 }
 
 static void br_aes_ct64_skey_expand(uint64_t *skey, const uint64_t *comp_skey) {
-    unsigned u, v, n;
+    unsigned int u, v, n;
 
     n = (14 + 1) << 1;
     for (u = 0, v = 0; u < n; u ++, v += 4) {
