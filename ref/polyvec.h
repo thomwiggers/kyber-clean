@@ -6,8 +6,8 @@
 
 #include <stdint.h>
 
-typedef struct{
-  poly vec[KYBER_K];
+typedef struct {
+    poly vec[KYBER_K];
 } polyvec;
 
 void PQCLEAN_NAMESPACE_polyvec_compress(uint8_t *r, polyvec *a);

@@ -11,105 +11,101 @@
 #define CRYPTO_CIPHERTEXTBYTES PQCLEAN_NAMESPACE_CRYPTO_CIPHERTEXTBYTES
 #define CRYPTO_SECRETKEYBYTES PQCLEAN_NAMESPACE_CRYPTO_SECRETKEYBYTES
 
-int test_keys()
-{
-  uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
-  uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
-  int i;
+int test_keys() {
+    uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
+    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
+    uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
+    int i;
 
-  for(i=0; i<NTESTS; i++)
-  {
-    //Alice generates a public key
-    PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
+    for (i = 0; i < NTESTS; i++) {
+        //Alice generates a public key
+        PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
 
-    //Bob derives a secret key and creates a response
-    PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
+        //Bob derives a secret key and creates a response
+        PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
 
-    //Alice uses Bobs response to get her secret key
-    PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
+        //Alice uses Bobs response to get her secret key
+        PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
 
-    if(memcmp(key_a, key_b, CRYPTO_BYTES))
-      printf("ERROR keys\n");
-  }
+        if (memcmp(key_a, key_b, CRYPTO_BYTES)) {
+            printf("ERROR keys\n");
+        }
+    }
 
-  return 0;
+    return 0;
 }
 
 
-int test_invalid_sk_a()
-{
-  uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
-  uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
-  int i;
+int test_invalid_sk_a() {
+    uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
+    uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
+    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
+    int i;
 
-  for(i=0; i<NTESTS; i++)
-  {
-    //Alice generates a public key
-    PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
+    for (i = 0; i < NTESTS; i++) {
+        //Alice generates a public key
+        PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
 
-    //Bob derives a secret key and creates a response
-    PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
+        //Bob derives a secret key and creates a response
+        PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
 
-    //Replace secret key with random values
-    randombytes(sk_a, CRYPTO_SECRETKEYBYTES);
+        //Replace secret key with random values
+        randombytes(sk_a, CRYPTO_SECRETKEYBYTES);
 
 
-    //Alice uses Bobs response to get her secre key
-    PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
+        //Alice uses Bobs response to get her secre key
+        PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
 
-    if(!memcmp(key_a, key_b, CRYPTO_BYTES))
-      printf("ERROR invalid sk_a\n");
-  }
+        if (!memcmp(key_a, key_b, CRYPTO_BYTES)) {
+            printf("ERROR invalid sk_a\n");
+        }
+    }
 
-  return 0;
+    return 0;
 }
 
 
-int test_invalid_ciphertext()
-{
-  uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
-  uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
-  int i;
-  size_t pos;
+int test_invalid_ciphertext() {
+    uint8_t sk_a[CRYPTO_SECRETKEYBYTES];
+    uint8_t key_a[CRYPTO_BYTES], key_b[CRYPTO_BYTES];
+    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sendb[CRYPTO_CIPHERTEXTBYTES];
+    int i;
+    size_t pos;
 
-  for(i=0; i<NTESTS; i++)
-  {
-    randombytes((uint8_t *)&pos, sizeof(size_t));
+    for (i = 0; i < NTESTS; i++) {
+        randombytes((uint8_t *)&pos, sizeof(size_t));
 
-    //Alice generates a public key
-    PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
+        //Alice generates a public key
+        PQCLEAN_NAMESPACE_crypto_kem_keypair(pk, sk_a);
 
-    //Bob derives a secret key and creates a response
-    PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
+        //Bob derives a secret key and creates a response
+        PQCLEAN_NAMESPACE_crypto_kem_enc(sendb, key_b, pk);
 
-    //Change some byte in the ciphertext (i.e., encapsulated key)
-    sendb[pos % CRYPTO_CIPHERTEXTBYTES] ^= 23;
+        //Change some byte in the ciphertext (i.e., encapsulated key)
+        sendb[pos % CRYPTO_CIPHERTEXTBYTES] ^= 23;
 
-    //Alice uses Bobs response to get her secre key
-    PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
+        //Alice uses Bobs response to get her secre key
+        PQCLEAN_NAMESPACE_crypto_kem_dec(key_a, sendb, sk_a);
 
-    if(!memcmp(key_a, key_b, CRYPTO_BYTES))
-      printf("ERROR invalid ciphertext\n");
-  }
+        if (!memcmp(key_a, key_b, CRYPTO_BYTES)) {
+            printf("ERROR invalid ciphertext\n");
+        }
+    }
 
-  return 0;
+    return 0;
 }
 
-int main(void)
-{
-  test_keys();
-  test_invalid_sk_a();
-  test_invalid_ciphertext();
+int main(void) {
+    test_keys();
+    test_invalid_sk_a();
+    test_invalid_ciphertext();
 
-  printf("CRYPTO_SECRETKEYBYTES:  %d\n",CRYPTO_SECRETKEYBYTES);
-  printf("CRYPTO_PUBLICKEYBYTES:  %d\n",CRYPTO_PUBLICKEYBYTES);
-  printf("CRYPTO_CIPHERTEXTBYTES: %d\n",CRYPTO_CIPHERTEXTBYTES);
+    printf("CRYPTO_SECRETKEYBYTES:  %d\n", CRYPTO_SECRETKEYBYTES);
+    printf("CRYPTO_PUBLICKEYBYTES:  %d\n", CRYPTO_PUBLICKEYBYTES);
+    printf("CRYPTO_CIPHERTEXTBYTES: %d\n", CRYPTO_CIPHERTEXTBYTES);
 
-  return 0;
+    return 0;
 }

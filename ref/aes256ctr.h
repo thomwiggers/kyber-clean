@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 typedef struct {
-  uint64_t sk_exp[120];
-	uint32_t ivw[16];
+    uint64_t sk_exp[120];
+    uint32_t ivw[16];
 } aes256xof_ctx;
 
 void PQCLEAN_NAMESPACE_aes256_prf(uint8_t *output, size_t outlen, const uint8_t *key, uint8_t nonce);

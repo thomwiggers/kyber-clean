@@ -26,10 +26,10 @@ int
 seedexpander_init(AES_XOF_struct *ctx,
                   uint8_t *seed,
                   uint8_t *diversifier,
-                  unsigned long maxlen)
-{
-    if ( maxlen >= 0x100000000 )
+                  unsigned long maxlen) {
+    if ( maxlen >= 0x100000000 ) {
         return RNG_BAD_MAXLEN;
+    }
 
     ctx->length_remaining = maxlen;
 
@@ -43,7 +43,7 @@ seedexpander_init(AES_XOF_struct *ctx,
     ctx->ctr[9] = maxlen % 256;
     maxlen >>= 8;
     ctx->ctr[8] = maxlen % 256;
-    memset(ctx->ctr+12, 0x00, 4);
+    memset(ctx->ctr + 12, 0x00, 4);
 
     ctx->buffer_pos = 16;
     memset(ctx->buffer, 0x00, 16);
@@ -58,39 +58,40 @@ seedexpander_init(AES_XOF_struct *ctx,
     xlen - number of bytes to return
  */
 int
-seedexpander(AES_XOF_struct *ctx, uint8_t *x, unsigned long xlen)
-{
+seedexpander(AES_XOF_struct *ctx, uint8_t *x, unsigned long xlen) {
     unsigned long   offset;
 
-    if ( x == NULL )
+    if ( x == NULL ) {
         return RNG_BAD_OUTBUF;
-    if ( xlen >= ctx->length_remaining )
+    }
+    if ( xlen >= ctx->length_remaining ) {
         return RNG_BAD_REQ_LEN;
+    }
 
     ctx->length_remaining -= xlen;
 
     offset = 0;
     while ( xlen > 0 ) {
-        if ( xlen <= (16-ctx->buffer_pos) ) { // buffer has what we need
-            memcpy(x+offset, ctx->buffer+ctx->buffer_pos, xlen);
+        if ( xlen <= (16 - ctx->buffer_pos) ) { // buffer has what we need
+            memcpy(x + offset, ctx->buffer + ctx->buffer_pos, xlen);
             ctx->buffer_pos += xlen;
 
             return RNG_SUCCESS;
         }
 
         // take what's in the buffer
-        memcpy(x+offset, ctx->buffer+ctx->buffer_pos, 16-ctx->buffer_pos);
-        xlen -= 16-ctx->buffer_pos;
-        offset += 16-ctx->buffer_pos;
+        memcpy(x + offset, ctx->buffer + ctx->buffer_pos, 16 - ctx->buffer_pos);
+        xlen -= 16 - ctx->buffer_pos;
+        offset += 16 - ctx->buffer_pos;
 
         AES256_ECB(ctx->key, ctx->ctr, ctx->buffer);
         ctx->buffer_pos = 0;
 
         //increment the counter
-        for (int i=15; i>=12; i--) {
-            if ( ctx->ctr[i] == 0xff )
+        for (int i = 15; i >= 12; i--) {
+            if ( ctx->ctr[i] == 0xff ) {
                 ctx->ctr[i] = 0x00;
-            else {
+            } else {
                 ctx->ctr[i]++;
                 break;
             }
@@ -102,8 +103,7 @@ seedexpander(AES_XOF_struct *ctx, uint8_t *x, unsigned long xlen)
 }
 
 
-void handleErrors(void)
-{
+void handleErrors(void) {
     ERR_print_errors_fp(stderr);
     abort();
 }
@@ -113,8 +113,7 @@ void handleErrors(void)
 //    ctr - a 128-bit plaintext value
 //    buffer - a 128-bit ciphertext value
 void
-AES256_ECB(uint8_t *key, uint8_t *ctr, uint8_t *buffer)
-{
+AES256_ECB(uint8_t *key, uint8_t *ctr, uint8_t *buffer) {
     EVP_CIPHER_CTX *ctx;
 
     int len;
@@ -122,13 +121,17 @@ AES256_ECB(uint8_t *key, uint8_t *ctr, uint8_t *buffer)
     int ciphertext_len;
 
     /* Create and initialise the context */
-    if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
-
-    if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL))
+    if (!(ctx = EVP_CIPHER_CTX_new())) {
         handleErrors();
+    }
 
-    if(1 != EVP_EncryptUpdate(ctx, buffer, &len, ctr, 16))
+    if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL)) {
         handleErrors();
+    }
+
+    if (1 != EVP_EncryptUpdate(ctx, buffer, &len, ctr, 16)) {
+        handleErrors();
+    }
     ciphertext_len = len;
 
     /* Clean up */
@@ -138,14 +141,14 @@ AES256_ECB(uint8_t *key, uint8_t *ctr, uint8_t *buffer)
 void
 randombytes_init(uint8_t *entropy_input,
                  uint8_t *personalization_string,
-                 int security_strength)
-{
+                 int security_strength) {
     uint8_t   seed_material[48];
 
     memcpy(seed_material, entropy_input, 48);
     if (personalization_string)
-        for (int i=0; i<48; i++)
+        for (int i = 0; i < 48; i++) {
             seed_material[i] ^= personalization_string[i];
+        }
     memset(DRBG_ctx.Key, 0x00, 32);
     memset(DRBG_ctx.V, 0x00, 16);
     AES256_CTR_DRBG_Update(seed_material, DRBG_ctx.Key, DRBG_ctx.V);
@@ -153,29 +156,27 @@ randombytes_init(uint8_t *entropy_input,
 }
 
 int
-randombytes(uint8_t *x, unsigned long long xlen)
-{
+randombytes(uint8_t *x, unsigned long long xlen) {
     uint8_t   block[16];
     int             i = 0;
 
     while ( xlen > 0 ) {
         //increment V
-        for (int j=15; j>=0; j--) {
-            if ( DRBG_ctx.V[j] == 0xff )
+        for (int j = 15; j >= 0; j--) {
+            if ( DRBG_ctx.V[j] == 0xff ) {
                 DRBG_ctx.V[j] = 0x00;
-            else {
+            } else {
                 DRBG_ctx.V[j]++;
                 break;
             }
         }
         AES256_ECB(DRBG_ctx.Key, DRBG_ctx.V, block);
         if ( xlen > 15 ) {
-            memcpy(x+i, block, 16);
+            memcpy(x + i, block, 16);
             i += 16;
             xlen -= 16;
-        }
-        else {
-            memcpy(x+i, block, xlen);
+        } else {
+            memcpy(x + i, block, xlen);
             xlen = 0;
         }
     }
@@ -188,28 +189,28 @@ randombytes(uint8_t *x, unsigned long long xlen)
 void
 AES256_CTR_DRBG_Update(uint8_t *provided_data,
                        uint8_t *Key,
-                       uint8_t *V)
-{
+                       uint8_t *V) {
     uint8_t   temp[48];
 
-    for (int i=0; i<3; i++) {
+    for (int i = 0; i < 3; i++) {
         //increment V
-        for (int j=15; j>=0; j--) {
-            if ( V[j] == 0xff )
+        for (int j = 15; j >= 0; j--) {
+            if ( V[j] == 0xff ) {
                 V[j] = 0x00;
-            else {
+            } else {
                 V[j]++;
                 break;
             }
         }
 
-        AES256_ECB(Key, V, temp+16*i);
+        AES256_ECB(Key, V, temp + 16 * i);
     }
     if ( provided_data != NULL )
-        for (int i=0; i<48; i++)
+        for (int i = 0; i < 48; i++) {
             temp[i] ^= provided_data[i];
+        }
     memcpy(Key, temp, 32);
-    memcpy(V, temp+32, 16);
+    memcpy(V, temp + 32, 16);
 }
 
 
