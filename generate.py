@@ -2,7 +2,10 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-TARGET_FOLDER = "../PQClean-kyber90s/crypto_kem/"
+
+
+CLEAN_TARGET_FOLDER = "../PQClean-kyber/crypto_kem/"
+NINETIES_TARGET_FOLDER = "../PQClean-kyber90s/crypto_kem/"
 
 KYBER_FILES = [
     'LICENSE',
@@ -90,43 +93,53 @@ params = [
     {'name': 'kyber512', 'impl': 'clean', 'def': ['KYBER_K=2'],
      'src': 'ref',
      'undef': ['KYBER_90S'],
+     'target': CLEAN_TARGET_FOLDER,
      'files': KYBER_FILES},
     {'name': 'kyber512', 'impl': 'avx2', 'def': ['KYBER_K=2'],
      'src': 'avx2',
+     'target': CLEAN_TARGET_FOLDER,
      'undef': ['KYBER_90S'],
      'files': KYBER_AVX2_FILES},
     {'name': 'kyber768', 'impl': 'clean', 'def': ['KYBER_K=3'],
      'src': 'ref',
+     'target': CLEAN_TARGET_FOLDER,
      'undef': ['KYBER_90S'],
      'files': KYBER_FILES},
     {'name': 'kyber768', 'impl': 'avx2', 'def': ['KYBER_K=3'],
      'src': 'avx2',
+     'target': CLEAN_TARGET_FOLDER,
      'undef': ['KYBER_90S'],
      'files': KYBER_AVX2_FILES},
     {'name': 'kyber1024', 'impl': 'clean', 'def': ['KYBER_K=4'],
      'src': 'ref',
+     'target': CLEAN_TARGET_FOLDER,
      'undef': ['KYBER_90S'],
      'files': KYBER_FILES},
     {'name': 'kyber1024', 'impl': 'avx2', 'def': ['KYBER_K=4'],
      'src': 'avx2',
+     'target': CLEAN_TARGET_FOLDER,
      'undef': ['KYBER_90S'],
      'files': KYBER_AVX2_FILES},
     # 90s versions
     {'name': 'kyber512-90s', 'impl': 'clean',
      'def': ['KYBER_K=2', 'KYBER_90S=1'],
      'src': 'ref', 'make': 'clean-90s',
+     'target': NINETIES_TARGET_FOLDER,
      'files': KYBER_90S_FILES},
     {'name': 'kyber768-90s', 'impl': 'clean',
      'def': ['KYBER_K=3', 'KYBER_90S=1'],
      'src': 'ref', 'make': 'clean-90s',
+     'target': NINETIES_TARGET_FOLDER,
      'files': KYBER_90S_FILES},
     {'name': 'kyber1024-90s', 'impl': 'clean',
      'def': ['KYBER_K=4', 'KYBER_90S=1'],
      'src': 'ref', 'make': 'clean-90s',
+     'target': NINETIES_TARGET_FOLDER,
      'files': KYBER_90S_FILES},
 ]
 
 for param in params:
+    TARGET_FOLDER = param['target']
     parameterSet = param['name']
     pqcleanDir = f"{TARGET_FOLDER}/{parameterSet}/{param['impl']}/"
 
