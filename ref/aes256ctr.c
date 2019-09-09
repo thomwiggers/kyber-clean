@@ -526,7 +526,7 @@ static void br_aes_ct64_ctr_init(uint64_t sk_exp[120], const uint8_t *key) {
 }
 
 
-static void br_aes_ct64_ctr_run(uint64_t sk_exp[120], const uint8_t *iv, uint32_t cc, unsigned char *data, size_t len) {
+static void br_aes_ct64_ctr_run(uint64_t sk_exp[120], const uint8_t *iv, uint32_t cc, uint8_t *data, size_t len) {
     uint32_t ivw[16];
     size_t i;
 
