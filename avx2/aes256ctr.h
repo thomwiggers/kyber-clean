@@ -1,9 +1,9 @@
 #ifndef AES256CTR_H
 #define AES256CTR_H
 
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <immintrin.h>
 
 typedef struct {
     __m128i rkeys[16];

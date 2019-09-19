@@ -6,9 +6,10 @@
   Public Domain
 */
 
-#include <stdint.h>
-#include <immintrin.h>
 #include "aes256ctr.h"
+
+#include <immintrin.h>
+#include <stdint.h>
 
 static inline void aesni_encrypt8(uint8_t *out,
                                   __m128i *n,
@@ -48,7 +49,7 @@ static inline void aesni_encrypt8(uint8_t *out,
     __m128i temp6 = _mm_xor_si128(nv6, rkeys[0]);
     __m128i temp7 = _mm_xor_si128(nv7, rkeys[0]);
 
-    for (int i = 1; i < 14; i++) {
+    for (uint8_t i = 1; i < 14; i++) {
         temp0 =  _mm_aesenc_si128(temp0, rkeys[i]);
         temp1 =  _mm_aesenc_si128(temp1, rkeys[i]);
         temp2 =  _mm_aesenc_si128(temp2, rkeys[i]);
@@ -85,7 +86,7 @@ void PQCLEAN_NAMESPACE_aes256ctr_init(aes256ctr_ctx *state,
     __m128i key0 = _mm_loadu_si128((__m128i *)(key + 0));
     __m128i key1 = _mm_loadu_si128((__m128i *)(key + 16));
     __m128i temp0, temp1, temp2, temp4;
-    int idx = 0;
+    size_t idx = 0;
 
     state->n = _mm_set_epi64x(0, (uint64_t)nonce << 48);
 
@@ -155,7 +156,7 @@ void PQCLEAN_NAMESPACE_aes256ctr_prf(uint8_t *out,
                                      size_t outlen,
                                      const uint8_t *seed,
                                      uint8_t nonce) {
-    unsigned int i;
+    size_t i;
     uint8_t buf[128];
     aes256ctr_ctx state;
 
