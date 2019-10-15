@@ -270,11 +270,7 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
     PQCLEAN_NAMESPACE_poly_nttunpack(&a[2].vec[0]);
     PQCLEAN_NAMESPACE_poly_nttunpack(&a[2].vec[1]);
 
-    if (transposed) {
-        PQCLEAN_NAMESPACE_kyber_shake128_absorb(&state1x, seed, 2, 2);
-    } else {
-        PQCLEAN_NAMESPACE_kyber_shake128_absorb(&state1x, seed, 2, 2);
-    }
+    PQCLEAN_NAMESPACE_kyber_shake128_absorb(&state1x, seed, 2, 2);
 
     PQCLEAN_NAMESPACE_kyber_shake128_squeezeblocks(buf.x[0], GEN_MATRIX_MAXNBLOCKS, &state1x);
     bufbytes = GEN_MATRIX_MAXNBLOCKS * XOF_BLOCKBYTES;
