@@ -11,7 +11,7 @@ static inline void br_enc32be(unsigned char *dst, uint32_t x) {
     dst[0] = (unsigned char)(x >> 24);
 }
 
-static void aes256_ctr_xof(unsigned char *out, size_t outlen, const unsigned char *iv, uint32_t ctr, const aes256ctx *ctx){
+static void aes256_ctr_xof(unsigned char *out, size_t outlen, const unsigned char *iv, uint32_t ctr, const aes256ctx *ctx) {
     uint8_t ivw[16];
     uint8_t buf[AES_BLOCKBYTES];
     size_t i;
@@ -90,6 +90,11 @@ void PQCLEAN_NAMESPACE_aes256xof_absorb(aes256xof_ctx *s, const uint8_t *key, ui
 *              - aes256xof_ctx *s:      AES "state", i.e. expanded key and IV
 **************************************************/
 void PQCLEAN_NAMESPACE_aes256xof_squeezeblocks(uint8_t *out, size_t nblocks, aes256xof_ctx *s) {
-    aes256_ctr_xof(out, nblocks*64, s->iv, s->ctr, &s->sk_exp);
-    s->ctr += (uint32_t) (4*nblocks);
+    aes256_ctr_xof(out, nblocks * 64, s->iv, s->ctr, &s->sk_exp);
+    s->ctr += (uint32_t) (4 * nblocks);
+}
+
+/** Free the AES ctx **/
+void PQCLEAN_NAMESPACE_aes256xof_ctx_release(aes256xof_ctx *s) {
+    aes256_ctx_release(&s->sk_exp);
 }

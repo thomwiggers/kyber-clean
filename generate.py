@@ -4,8 +4,8 @@ import subprocess
 from pathlib import Path
 
 
-CLEAN_TARGET_FOLDER = "../PQClean-kyber/crypto_kem/"
-NINETIES_TARGET_FOLDER = "../PQClean-kyber90s/crypto_kem/"
+CLEAN_TARGET_FOLDER = "../PQClean/crypto_kem/"
+NINETIES_TARGET_FOLDER = "../PQClean/crypto_kem/"
 
 KYBER_FILES = [
     'LICENSE',

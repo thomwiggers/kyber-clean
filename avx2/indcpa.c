@@ -284,6 +284,8 @@ static void gen_matrix(polyvec *a, const uint8_t *seed, int transposed) {
         ctr0 += rej_uniform_ref(a[2].vec[2].coeffs + ctr0, KYBER_N - ctr0, buf.x[0], bufbytes);
     }
 
+    xof_ctx_release(&state1x);
+
     PQCLEAN_NAMESPACE_poly_nttunpack(&a[2].vec[2]);
 }
 #elif KYBER_K == 4

@@ -12,6 +12,7 @@
 #define hash_g(OUT, IN, INBYTES) sha512((OUT), (IN), (INBYTES))
 #define xof_absorb(STATE, IN, X, Y) PQCLEAN_NAMESPACE_aes256ctr_init((STATE), (IN), (Y) + ((uint16_t)(X) << 8))
 #define xof_squeezeblocks(OUT, OUTBLOCKS, STATE) PQCLEAN_NAMESPACE_aes256ctr_squeezeblocks((OUT), (OUTBLOCKS), (STATE))
+#define xof_ctx_release(STATE)
 #define prf(OUT, OUTBYTES, KEY, NONCE) PQCLEAN_NAMESPACE_aes256ctr_prf((OUT), (OUTBYTES), (KEY), (NONCE))
 #define kdf(OUT, IN, INBYTES) sha256((OUT), (IN), (INBYTES))
 
@@ -34,6 +35,7 @@ void PQCLEAN_NAMESPACE_shake256_prf(uint8_t *output, size_t outlen, const uint8_
 #define hash_g(OUT, IN, INBYTES) sha3_512(OUT, IN, INBYTES)
 #define xof_absorb(STATE, IN, X, Y) PQCLEAN_NAMESPACE_kyber_shake128_absorb(STATE, IN, X, Y)
 #define xof_squeezeblocks(OUT, OUTBLOCKS, STATE) shake128_squeezeblocks(OUT, OUTBLOCKS, STATE)
+#define xof_ctx_release(STATE) shake128_ctx_release(STATE)
 #define prf(OUT, OUTBYTES, KEY, NONCE) PQCLEAN_NAMESPACE_shake256_prf(OUT, OUTBYTES, KEY, NONCE)
 #define kdf(OUT, IN, INBYTES) shake256(OUT, KYBER_SSBYTES, IN, INBYTES)
 
